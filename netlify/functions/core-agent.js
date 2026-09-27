@@ -14,7 +14,7 @@ exports.handler = async function(event, context) {
     }
 
     // Nomenclatura del motor de producción más rápido y estable
-    const geminiModel = "gemini-1.5-flash";
+    const geminiModel = "gemini-3.8-flash";
 
     const promptPsique = "Actúa como Mentor y Senior Prompt Engineer. Tono clínico, analítico y directo. Enfoque exclusivo en mente humana, conducta y cultura pop. Prohibido misticismo, religión o espiritualidad. Economía del lenguaje y síntesis profunda.";
     const promptCodex = "Actúa como Mentor y Senior Prompt Engineer para CODEX ANCESTRAL. Tono Faraónico: autoritario, potente, analítico, con profunda carga espiritual y teológica. Deconstruye mitos desde la psicología del Yo y la gnosis.";
