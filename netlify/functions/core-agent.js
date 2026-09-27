@@ -13,23 +13,8 @@ exports.handler = async function(event, context) {
         throw new Error("Variables de entorno ausentes. El servidor no puede autenticarse.");
     }
 
-    // ==========================================
-    // AUTO-DESCUBRIMIENTO DEL MODELO AUTORIZADO
-    // ==========================================
-    const checkRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiKey}`);
-    const checkData = await checkRes.json();
-    
-    if (!checkRes.ok) {
-        throw new Error(`Google rechazó la validación de la llave: ${checkData.error?.message || 'Credencial inválida'}`);
-    }
-
-    let geminiModel = "gemini-1.5-flash"; 
-    if (checkData.models) {
-        const availableModel = checkData.models.find(m => m.name.includes("1.5-flash") && m.supportedGenerationMethods.includes("generateContent")) || checkData.models.find(m => m.supportedGenerationMethods.includes("generateContent"));
-        if (availableModel) {
-            geminiModel = availableModel.name.replace('models/', '');
-        }
-    }
+    // Nomenclatura exigida explícitamente por el servidor de Google
+    const geminiModel = "gemini-3.8-flash";
 
     const promptPsique = "Actúa como Mentor y Senior Prompt Engineer. Tono clínico, analítico y directo. Enfoque exclusivo en mente humana, conducta y cultura pop. Prohibido misticismo, religión o espiritualidad. Economía del lenguaje y síntesis profunda.";
     const promptCodex = "Actúa como Mentor y Senior Prompt Engineer para CODEX ANCESTRAL. Tono Faraónico (estilo Narritvs): autoritario, potente, analítico, con profunda carga espiritual y teológica. Deconstruye mitos desde la psicología del Yo y la gnosis.";
@@ -53,7 +38,7 @@ exports.handler = async function(event, context) {
       });
       
       const geminiData = await geminiRes.json();
-      if (!geminiRes.ok) throw new Error(`Fallo de Gemini (${geminiModel}): ${geminiData.error?.message || 'Error en la petición.'}`);
+      if (!geminiRes.ok) throw new Error(`Rechazo Gemini: ${geminiData.error?.message || 'Error en la petición.'}`);
       if (!geminiData.candidates) throw new Error("Gemini no devolvió texto estructurado.");
       
       const resultadoTexto = geminiData.candidates[0].content.parts[0].text;
@@ -101,7 +86,7 @@ exports.handler = async function(event, context) {
       });
       
       const geminiDataVisual = await geminiResVisual.json();
-      if (!geminiResVisual.ok) throw new Error(`Fallo Visual de Gemini (${geminiModel}): ${geminiDataVisual.error?.message || 'Error en prompt visual.'}`);
+      if (!geminiResVisual.ok) throw new Error(`Rechazo Gemini Visual: ${geminiDataVisual.error?.message || 'Error en prompt visual.'}`);
       
       const visualTexto = geminiDataVisual.candidates[0].content.parts[0].text;
 
