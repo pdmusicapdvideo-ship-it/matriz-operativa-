@@ -13,11 +13,11 @@ exports.handler = async function(event, context) {
         throw new Error("Variables de entorno ausentes. El servidor no puede autenticarse.");
     }
 
-    // Nomenclatura exigida explícitamente por el servidor de Google
-    const geminiModel = "gemini-3.8-flash";
+    // Nomenclatura del motor de producción más rápido y estable
+    const geminiModel = "gemini-1.5-flash";
 
     const promptPsique = "Actúa como Mentor y Senior Prompt Engineer. Tono clínico, analítico y directo. Enfoque exclusivo en mente humana, conducta y cultura pop. Prohibido misticismo, religión o espiritualidad. Economía del lenguaje y síntesis profunda.";
-    const promptCodex = "Actúa como Mentor y Senior Prompt Engineer para CODEX ANCESTRAL. Tono Faraónico (estilo Narritvs): autoritario, potente, analítico, con profunda carga espiritual y teológica. Deconstruye mitos desde la psicología del Yo y la gnosis.";
+    const promptCodex = "Actúa como Mentor y Senior Prompt Engineer para CODEX ANCESTRAL. Tono Faraónico: autoritario, potente, analítico, con profunda carga espiritual y teológica. Deconstruye mitos desde la psicología del Yo y la gnosis.";
     const systemInstruction = agente === 'codex' ? promptCodex : promptPsique;
 
     // ==========================================
@@ -27,8 +27,10 @@ exports.handler = async function(event, context) {
       if (!tema || !agente) throw new Error("Faltan parámetros en la Fase 1.");
 
       const geminiPayload = {
-        contents: [{ parts: [{ text: `Tema: ${tema}\n\nInstrucción: Genera un guion técnico de 3 bloques (Fase 1 y 2). Usa pausas (...) para ElevenLabs. Luego, genera la Fase 4 (SEO: Títulos, miniatura, etiquetas y comentario). Estructura el texto claramente separando GUION y SEO.` }] }],
-        systemInstruction: { parts: [{ text: systemInstruction }] }
+        contents: [{ parts: [{ text: `Tema: ${tema}\n\nInstrucción: Genera un guion técnico de 3 bloques (Fase 1 y 2). Usa pausas (...) para ElevenLabs. Luego, genera la Fase 4 (SEO). Estructura el texto separando GUION y SEO. Sé directo, de alta densidad y extrema brevedad para optimizar el tiempo de red computacional.` }] }],
+        systemInstruction: { parts: [{ text: systemInstruction }] },
+        // Límite estricto para evitar el timeout de 10 segundos de Netlify
+        generationConfig: { maxOutputTokens: 800, temperature: 0.7 }
       };
 
       const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiKey}`, {
@@ -37,9 +39,18 @@ exports.handler = async function(event, context) {
         body: JSON.stringify(geminiPayload)
       });
       
-      const geminiData = await geminiRes.json();
-      if (!geminiRes.ok) throw new Error(`Rechazo Gemini: ${geminiData.error?.message || 'Error en la petición.'}`);
-      if (!geminiData.candidates) throw new Error("Gemini no devolvió texto estructurado.");
+      // Programación defensiva: Extraer como texto crudo primero para evitar el colapso HTML
+      const rawText = await geminiRes.text();
+      let geminiData;
+      
+      try {
+          geminiData = JSON.parse(rawText);
+      } catch (parseError) {
+          throw new Error(`Latencia crítica de red. Netlify cortó la conexión. Respuesta del servidor: ${rawText.substring(0, 50)}...`);
+      }
+
+      if (!geminiRes.ok) throw new Error(`Rechazo del Motor Gemini: ${geminiData.error?.message || 'Error de procesamiento.'}`);
+      if (!geminiData.candidates) throw new Error("El modelo procesó la solicitud pero no devolvió el paquete de texto.");
       
       const resultadoTexto = geminiData.candidates[0].content.parts[0].text;
       const mitad = Math.floor(resultadoTexto.length / 2);
@@ -53,7 +64,7 @@ exports.handler = async function(event, context) {
       });
 
       const supaData = await supaRes.json();
-      if (!supaRes.ok) throw new Error(`Rechazo de Supabase: ${supaData.message || supaData.hint || 'Error de base de datos.'}`);
+      if (!supaRes.ok) throw new Error(`Rechazo de persistencia en Supabase: ${supaData.message || supaData.hint}`);
 
       return { statusCode: 200, body: JSON.stringify({ id: supaData[0].id, mensaje: "Narrativa extraída.", guion: guionExtract, seo: seoExtract }) };
     } 
@@ -75,8 +86,9 @@ exports.handler = async function(event, context) {
       const systemInstVisual = agentePrevio === 'codex' ? promptCodex : promptPsique;
 
       const visualPayload = {
-        contents: [{ parts: [{ text: `Guion Base:\n${guionPrevio}\n\nTiempos de Audio: ${tiempos_audio}\n\nInstrucción: Calcula la cantidad de clips visuales necesarios. Genera Prompts Cinemátográficos de alta gama, claroscuro dramático, colores vibrantes. Estilo digital minimalista. Crea secuencias de 3 clips de historia seguidos de 3 de relleno. Entregar en Inglés con traducción al Español.` }] }],
-        systemInstruction: { parts: [{ text: systemInstVisual }] }
+        contents: [{ parts: [{ text: `Guion Base:\n${guionPrevio}\n\nTiempos de Audio: ${tiempos_audio}\n\nInstrucción: Calcula visuales necesarios. Genera Prompts Cinemátográficos de alta gama. Minimalista. Secuencias: 3 de historia, 3 de relleno. Entregar en Inglés y Español. Máxima brevedad.` }] }],
+        systemInstruction: { parts: [{ text: systemInstVisual }] },
+        generationConfig: { maxOutputTokens: 800, temperature: 0.7 }
       };
 
       const geminiResVisual = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiKey}`, {
@@ -85,8 +97,16 @@ exports.handler = async function(event, context) {
         body: JSON.stringify(visualPayload)
       });
       
-      const geminiDataVisual = await geminiResVisual.json();
-      if (!geminiResVisual.ok) throw new Error(`Rechazo Gemini Visual: ${geminiDataVisual.error?.message || 'Error en prompt visual.'}`);
+      const rawTextVisual = await geminiResVisual.text();
+      let geminiDataVisual;
+      
+      try {
+          geminiDataVisual = JSON.parse(rawTextVisual);
+      } catch (e) {
+          throw new Error("Latencia crítica en Fase 2. El servidor cortó la conexión.");
+      }
+
+      if (!geminiResVisual.ok) throw new Error(`Rechazo Visual: ${geminiDataVisual.error?.message}`);
       
       const visualTexto = geminiDataVisual.candidates[0].content.parts[0].text;
 
@@ -96,7 +116,7 @@ exports.handler = async function(event, context) {
         body: JSON.stringify({ tiempos_audio, prompts_visuales: visualTexto, estado: "completado" })
       });
       const updateData = await updateRes.json();
-      if (!updateRes.ok) throw new Error(`Rechazo de Supabase (Actualización): ${updateData.message || 'Error al guardar.'}`);
+      if (!updateRes.ok) throw new Error(`Rechazo de Supabase (Actualización): ${updateData.message}`);
 
       return { statusCode: 200, body: JSON.stringify({ id: id_registro, mensaje: "Vectores sincronizados.", visuales: visualTexto }) };
     }
