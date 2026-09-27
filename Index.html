@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matriz Operativa - Minimalista</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #F4F1EA; 
+            color: #1A1A1A; 
+        }
+        .border-nude { border-color: #E2DFD6; }
+        .focus-red:focus-within { border-color: #991B1B; }
+        textarea, input, button { transition: all 0.3s ease; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #D4D4D4; }
+        .loader { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 sm:p-8 antialiased selection:bg-red-200">
+
+    <header class="w-full max-w-3xl mb-12 flex flex-col items-center">
+        <div class="flex items-center gap-2 mb-8">
+            <div id="status-indicator" class="w-1.5 h-1.5 bg-red-700 rounded-full"></div>
+            <h1 class="text-xs font-semibold tracking-[0.2em] text-black uppercase">Núcleo Operativo</h1>
+        </div>
+        
+        <div class="flex border-b border-black w-full sm:w-auto">
+            <button id="btn-psique" class="flex-1 sm:flex-none px-6 py-2 text-xs tracking-widest font-medium text-white bg-black" onclick="setAgent('psique')">
+                PSIQUE UNIVERSAL
+            </button>
+            <button id="btn-codex" class="flex-1 sm:flex-none px-6 py-2 text-xs tracking-widest font-medium text-zinc-400 bg-transparent hover:text-black" onclick="setAgent('codex')">
+                CODEX ANCESTRAL
+            </button>
+        </div>
+    </header>
+
+    <main class="w-full max-w-3xl flex flex-col gap-10 mb-12">
+        
+        <!-- FASE 1 -->
+        <section class="flex flex-col gap-4">
+            <label class="text-[10px] font-semibold text-red-700 uppercase tracking-widest">Fase 1 // Concepción Narrativa</label>
+            <div class="bg-white p-6 border border-nude focus-red">
+                <textarea id="input-tema" rows="2" class="w-full bg-transparent text-lg font-light text-black border-none outline-none resize-none placeholder-zinc-300" placeholder="Describe el tema central..."></textarea>
+            </div>
+            <button id="btn-fase1" onclick="ejecutarFase1()" class="self-end bg-black text-white px-8 py-3 text-xs tracking-widest font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                EXTRAER GUION
+            </button>
+        </section>
+
+        <!-- SALIDA FASE 1 -->
+        <section class="border-t border-nude pt-8 flex flex-col gap-6">
+            <div class="flex flex-col gap-2">
+                <div class="flex justify-between items-end border-b border-nude pb-2">
+                    <span class="text-xs font-medium tracking-widest text-black">DOCUMENTO TÉCNICO</span>
+                </div>
+                <div id="output-guion" class="bg-white/50 p-6 border border-nude text-sm font-light leading-relaxed text-zinc-700 min-h-[150px] whitespace-pre-wrap">
+                    [Esperando directrices...]
+                </div>
+            </div>
+        </section>
+
+        <!-- FASE 2 -->
+        <section class="flex flex-col gap-4 pt-4">
+            <label class="text-[10px] font-semibold text-red-700 uppercase tracking-widest">Fase 2 // Vectores de ElevenLabs (Segundos)</label>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="bg-white p-4 border border-nude focus-red text-center">
+                    <label class="block text-[10px] text-zinc-400 tracking-widest mb-2">BLOQUE 1</label>
+                    <input type="number" id="t-b1" class="w-full bg-transparent text-xl font-medium text-black text-center outline-none placeholder-zinc-200" placeholder="0">
+                </div>
+                <div class="bg-white p-4 border border-nude focus-red text-center">
+                    <label class="block text-[10px] text-zinc-400 tracking-widest mb-2">BLOQUE 2</label>
+                    <input type="number" id="t-b2" class="w-full bg-transparent text-xl font-medium text-black text-center outline-none placeholder-zinc-200" placeholder="0">
+                </div>
+                <div class="bg-white p-4 border border-nude focus-red text-center">
+                    <label class="block text-[10px] text-zinc-400 tracking-widest mb-2">BLOQUE 3</label>
+                    <input type="number" id="t-b3" class="w-full bg-transparent text-xl font-medium text-black text-center outline-none placeholder-zinc-200" placeholder="0">
+                </div>
+            </div>
+            <button id="btn-fase2" onclick="ejecutarFase2()" class="self-end bg-transparent border border-black text-black px-8 py-3 text-xs tracking-widest font-medium hover:bg-black hover:text-white disabled:opacity-50 disabled:cursor-not-allowed mt-2">
+                CALCULAR VISUALES
+            </button>
+        </section>
+
+        <!-- SALIDA FASE 2 -->
+        <section class="border-t border-nude pt-8 flex flex-col gap-6">
+            <div class="flex flex-col gap-2">
+                <div class="flex justify-between items-end border-b border-nude pb-2">
+                    <span class="text-xs font-medium tracking-widest text-black">STORYBOARD CINEMATOGRÁFICO</span>
+                </div>
+                <div id="output-visuales" class="bg-white p-6 border border-l-2 border-l-red-700 border-nude text-sm font-light leading-relaxed text-zinc-700 min-h-[150px] whitespace-pre-wrap">
+                    [A la espera de sincronización de tiempos...]
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        let agenteActivo = 'psique';
+        let idRegistroSupabase = null;
+
+        function setAgent(agente) {
+            agenteActivo = agente;
+            const btnPsique = document.getElementById('btn-psique');
+            const btnCodex = document.getElementById('btn-codex');
+
+            if (agente === 'psique') {
+                btnPsique.className = "flex-1 sm:flex-none px-6 py-2 text-xs tracking-widest font-medium text-white bg-black";
+                btnCodex.className = "flex-1 sm:flex-none px-6 py-2 text-xs tracking-widest font-medium text-zinc-400 bg-transparent hover:text-black";
+            } else {
+                btnCodex.className = "flex-1 sm:flex-none px-6 py-2 text-xs tracking-widest font-medium text-white bg-black";
+                btnPsique.className = "flex-1 sm:flex-none px-6 py-2 text-xs tracking-widest font-medium text-zinc-400 bg-transparent hover:text-black";
+            }
+        }
+
+        function toggleLoading(btnId, isProcessing, textDefault) {
+            const btn = document.getElementById(btnId);
+            const indicator = document.getElementById('status-indicator');
+            
+            if (isProcessing) {
+                btn.disabled = true;
+                btn.innerText = "PROCESANDO...";
+                indicator.classList.add('loader');
+            } else {
+                btn.disabled = false;
+                btn.innerText = textDefault;
+                indicator.classList.remove('loader');
+            }
+        }
+
+        async function ejecutarFase1() {
+            const tema = document.getElementById('input-tema').value.trim();
+            const outputGuion = document.getElementById('output-guion');
+
+            if (!tema) {
+                outputGuion.innerHTML = "<span class='text-red-700 font-medium'>ERROR:</span> Debes ingresar un tema para iniciar la matriz.";
+                return;
+            }
+
+            toggleLoading('btn-fase1', true, 'EXTRAER GUION');
+            outputGuion.innerText = "Estableciendo conexión con el servidor...";
+
+            try {
+                const res = await fetch('/.netlify/functions/core-agent', {
+                    method: 'POST',
+                    body: JSON.stringify({ accion: 'fase_1', agente: agenteActivo, tema: tema })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Falla en la respuesta del servidor.");
+                
+                idRegistroSupabase = data.id;
+                outputGuion.innerHTML = `<span class='font-medium text-black'>[GUION]</span>\n\n${data.guion}\n\n<hr class='border-nude my-4'>\n<span class='font-medium text-black'>[SEO]</span>\n\n${data.seo}`;
+                
+            } catch (error) {
+                outputGuion.innerHTML = `<span class='text-red-700 font-medium'>ERROR DEL SISTEMA:</span> ${error.message}`;
+            } finally {
+                toggleLoading('btn-fase1', false, 'EXTRAER GUION');
+            }
+        }
+
+        async function ejecutarFase2() {
+            const b1 = document.getElementById('t-b1').value;
+            const b2 = document.getElementById('t-b2').value;
+            const b3 = document.getElementById('t-b3').value;
+            const outputVisuales = document.getElementById('output-visuales');
+
+            if (!idRegistroSupabase) {
+                outputVisuales.innerHTML = "<span class='text-red-700 font-medium'>ERROR:</span> Debes extraer la Fase 1 primero.";
+                return;
+            }
+
+            if (!b1 || !b2 || !b3) {
+                outputVisuales.innerHTML = "<span class='text-red-700 font-medium'>ERROR:</span> Faltan vectores de tiempo.";
+                return;
+            }
+
+            toggleLoading('btn-fase2', true, 'CALCULAR VISUALES');
+            outputVisuales.innerText = "Sincronizando vectores de tiempo y generando prompts cinematográficos...";
+
+            try {
+                const tiempos = `Bloque 1: ${b1}s, Bloque 2: ${b2}s, Bloque 3: ${b3}s`;
+                
+                const res = await fetch('/.netlify/functions/core-agent', {
+                    method: 'POST',
+                    body: JSON.stringify({ accion: 'fase_2', id_registro: idRegistroSupabase, tiempos_audio: tiempos })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Falla en el cálculo visual.");
+                
+                outputVisuales.innerText = data.visuales;
+                
+            } catch (error) {
+                outputVisuales.innerHTML = `<span class='text-red-700 font-medium'>ERROR DEL SISTEMA:</span> ${error.message}`;
+            } finally {
+                toggleLoading('btn-fase2', false, 'CALCULAR VISUALES');
+            }
+        }
+    </script>
+</body>
+</html>
