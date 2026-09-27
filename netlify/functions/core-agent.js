@@ -17,7 +17,7 @@ exports.handler = async function(event, context) {
     const promptCodex = "Actúa como Mentor y Senior Prompt Engineer para CODEX ANCESTRAL. Tono Faraónico (estilo Narritvs): autoritario, potente, analítico, con profunda carga espiritual y teológica. Deconstruye mitos desde la psicología del Yo y la gnosis.";
 
     const systemInstruction = agente === 'codex' ? promptCodex : promptPsique;
-    const geminiModel = "gemini-3.8-flash";
+    const geminiModel = "gemini-1.5-flash";
 
     // ==========================================
     // FASE 1: EXTRACCIÓN DE NARRATIVA Y SEO
